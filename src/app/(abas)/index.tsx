@@ -22,10 +22,8 @@ export default function Inicio() {
   };
   const doMes = resumo(intervalo('mes', h));
   const blocos = [
-    { rotulo: 'Hoje', ...resumo(intervalo('dia', h)) },
-    { rotulo: 'Esta semana', ...resumo(intervalo('semana', h)) },
-    { rotulo: 'Dia 1 a 15', ...resumo(intervalo('q1', h)) },
-    { rotulo: `Dia 16 a ${ultimoDiaDoMes(ano, mes)}`, ...resumo(intervalo('q2', h)) },
+    { rotulo: 'Quinzena', dias: '1 ao 15', fundo: '#E8F0FD', borda: '#CFDDF5', ...resumo(intervalo('q1', h)) },
+    { rotulo: 'Quinzena', dias: `16 ao ${ultimoDiaDoMes(ano, mes)}`, fundo: '#FFF4DD', borda: '#F3DFB2', ...resumo(intervalo('q2', h)) },
   ];
   const ultimas = faxinas.slice(0, 3);
   const semLocais = locaisAtivos.length === 0;
@@ -33,10 +31,10 @@ export default function Inicio() {
   return (
     <Tela comAbas>
       <View style={{ gap: 2 }}>
-        <T tam={17} cor={cor.suave}>
+        <T tam={15} cor={cor.suave}>
           {tituloDia(h)}
         </T>
-        <T titulo tam={32}>
+        <T titulo tam={24}>
           {saudacao()}, {nome}!
         </T>
       </View>
@@ -64,9 +62,9 @@ export default function Inicio() {
 
       <View style={est.grade}>
         {blocos.map((b) => (
-          <Cartao key={b.rotulo} style={est.bloco}>
-            <T tam={15} cor={cor.suave}>
-              {b.rotulo}
+          <Cartao key={b.dias} style={[est.bloco, { backgroundColor: b.fundo, borderColor: b.borda }]}>
+            <T negrito tam={15} cor={cor.suave}>
+              {b.rotulo} <T tam={15} cor={cor.suave}>({b.dias})</T>
             </T>
             <T titulo tam={28}>
               {b.qtd}
