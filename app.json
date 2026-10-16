@@ -33,7 +33,7 @@
       "expo-font"
     ],
     "experiments": {
-      "baseUrl": "/diarias"
+      "baseUrl": "/minhas-diarias"
     }
   }
 }

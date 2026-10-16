@@ -1,6 +1,6 @@
 // Ajustes depois do "expo export" para publicar no GitHub Pages:
-// - prefixa os links do PWA com o caminho do repositório (ex.: /diarias);
-// - cria o 404.html (o GitHub Pages usa ele para abrir as telas internas, ex.: /diarias/calendario);
+// - prefixa os links do PWA com o caminho do repositório (ex.: /minhas-diarias);
+// - cria o 404.html (o GitHub Pages usa ele para abrir as telas internas, ex.: /minhas-diarias/calendario);
 // - cria o .nojekyll (sem ele o GitHub ignora a pasta _expo).
 import { copyFileSync, readFileSync, writeFileSync } from 'node:fs';
 

@@ -76,9 +76,9 @@ O repositório já tem o workflow [`.github/workflows/publicar.yml`](.github/wor
    - `EXPO_PUBLIC_SUPABASE_KEY`
 3. Em **Actions → Publicar no GitHub Pages → Run workflow** (ou faça um push).
 
-O app fica em **https://thialison.github.io/diarias/**. Sem as variáveis, o site sobe em modo demonstração, com os dados só no aparelho.
+O app fica em **https://thialison.github.io/minhas-diarias/**. Sem as variáveis, o site sobe em modo demonstração, com os dados só no aparelho.
 
-> Se o repositório tiver outro nome, troque `"baseUrl": "/diarias"` no `app.json` pelo novo nome.
+> Se o repositório tiver outro nome, troque `"baseUrl": "/minhas-diarias"` no `app.json` pelo novo nome.
 
 ## 4. Instalar no celular
 
@@ -115,7 +115,7 @@ src/
   tema.ts              cores e fontes
 supabase/              SQL do banco
 public/                manifest, ícones e service worker do PWA
-scripts/pos-build.mjs  ajustes para o GitHub Pages (caminho /diarias, 404.html)
+scripts/pos-build.mjs  ajustes para o GitHub Pages (caminho /minhas-diarias, 404.html)
 .github/workflows/     publicação automática no GitHub Pages
 ```
 
