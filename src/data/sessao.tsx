@@ -14,9 +14,12 @@ interface Sessao {
   admin: boolean;
   nome: string | null;
   email: string | null;
-  /** Manda o código de acesso por e-mail. Retorna a mensagem de erro, se houver. */
-  enviarCodigo(email: string): Promise<string | null>;
-  confirmarCodigo(email: string, codigo: string): Promise<string | null>;
+  /** Diz se o e-mail pode entrar e se já tem senha criada. */
+  verificarEmail(email: string): Promise<{ situacao?: 'entrar' | 'criar_senha'; erro?: string }>;
+  /** Entra com e-mail e senha. Retorna a mensagem de erro, se houver. */
+  entrar(email: string, senha: string): Promise<string | null>;
+  /** Primeiro acesso: cria a senha da pessoa (o e-mail precisa estar em Membros). */
+  criarSenha(email: string, senha: string): Promise<string | null>;
   definirNome(nome: string): Promise<string | null>;
   sair(): Promise<void>;
   /** Consulta de novo se o e-mail foi liberado (ex.: depois que o admin incluir). */
@@ -29,7 +32,12 @@ const CHAVE_NOME_DEMO = 'diarias-nome';
 function traduzirErro(msg: string): string {
   if (/rate limit|too many|security purposes/i.test(msg))
     return 'Muitas tentativas seguidas. Espere alguns minutos e tente de novo.';
-  if (/expired|invalid|otp/i.test(msg)) return 'Código errado ou vencido. Confira o e-mail ou peça um novo código.';
+  if (/invalid login credentials/i.test(msg)) return 'Senha incorreta. Confira e tente de novo.';
+  if (/already registered|already been registered|user already exists/i.test(msg))
+    return 'Esse e-mail já tem senha. Volte e entre com a senha.';
+  if (/password should be at least|weak password/i.test(msg)) return 'A senha precisa ter pelo menos 6 caracteres.';
+  if (/email not confirmed/i.test(msg))
+    return 'O Supabase está pedindo confirmação por e-mail. O administrador precisa desligar "Confirm email".';
   if (/network|fetch/i.test(msg)) return 'Sem conexão com a internet. Tente de novo.';
   return msg;
 }
@@ -79,23 +87,32 @@ export function SessaoProvider({ children }: { children: ReactNode }) {
   const checandoPapel = Boolean(email) && papelDe?.de !== email;
   const papel = papelDe?.de === email ? papelDe.papel : null;
 
-  const enviarCodigo = useCallback(async (emailDigitado: string) => {
-    if (!supabase) return null;
+  const verificarEmail = useCallback(async (emailDigitado: string) => {
+    if (!supabase) return {};
     const e = normalizarEmail(emailDigitado);
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)) return 'Digite um e-mail válido.';
-    const { data: liberado, error: erroLista } = await supabase.rpc('email_liberado', { p_email: e });
-    if (erroLista) return traduzirErro(erroLista.message);
-    if (!liberado) return 'Esse e-mail ainda não tem acesso. Peça para o administrador incluir você em Membros.';
-    const { error } = await supabase.auth.signInWithOtp({ email: e, options: { shouldCreateUser: true } });
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)) return { erro: 'Digite um e-mail válido.' };
+    const { data, error } = await supabase.rpc('situacao_email', { p_email: e });
+    if (error) return { erro: traduzirErro(error.message) };
+    if (data === 'sem_acesso')
+      return { erro: 'Esse e-mail ainda não tem acesso. Peça para o administrador incluir você em Membros.' };
+    return { situacao: data as 'entrar' | 'criar_senha' };
+  }, []);
+
+  const entrar = useCallback(async (emailDigitado: string, senha: string) => {
+    if (!supabase) return null;
+    if (!senha) return 'Digite sua senha.';
+    const { error } = await supabase.auth.signInWithPassword({ email: normalizarEmail(emailDigitado), password: senha });
     return error ? traduzirErro(error.message) : null;
   }, []);
 
-  const confirmarCodigo = useCallback(async (emailDigitado: string, codigo: string) => {
+  const criarSenha = useCallback(async (emailDigitado: string, senha: string) => {
     if (!supabase) return null;
-    const token = codigo.replace(/\D/g, '');
-    if (token.length < 6) return 'O código tem 6 números. Confira no e-mail.';
-    const { error } = await supabase.auth.verifyOtp({ email: normalizarEmail(emailDigitado), token, type: 'email' });
-    return error ? traduzirErro(error.message) : null;
+    if (senha.length < 6) return 'A senha precisa ter pelo menos 6 caracteres.';
+    const { data, error } = await supabase.auth.signUp({ email: normalizarEmail(emailDigitado), password: senha });
+    if (error) return traduzirErro(error.message);
+    if (!data.session)
+      return 'Senha criada, mas o Supabase pediu confirmação por e-mail. O administrador precisa desligar "Confirm email" no Supabase.';
+    return null;
   }, []);
 
   const definirNome = useCallback(async (nome: string) => {
@@ -124,7 +141,7 @@ export function SessaoProvider({ children }: { children: ReactNode }) {
       setPapelDe(null);
       setTentativa((t) => t + 1);
     };
-    const comuns = { enviarCodigo, confirmarCodigo, definirNome, sair, verificarAcesso };
+    const comuns = { verificarEmail, entrar, criarSenha, definirNome, sair, verificarAcesso };
     if (!nuvemConfigurada) {
       return { ...comuns, carregando, modo: 'demo', logado: true, temAcesso: true, admin: false, nome: nomeDemo, email: null };
     }
@@ -139,7 +156,7 @@ export function SessaoProvider({ children }: { children: ReactNode }) {
       nome,
       email,
     };
-  }, [carregando, checandoPapel, sessao, papel, email, nomeDemo, enviarCodigo, confirmarCodigo, definirNome, sair]);
+  }, [carregando, checandoPapel, sessao, papel, email, nomeDemo, verificarEmail, entrar, criarSenha, definirNome, sair]);
 
   return <Contexto.Provider value={valor}>{children}</Contexto.Provider>;
 }

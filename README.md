@@ -36,28 +36,29 @@ Abra o endereço que aparecer no terminal (normalmente http://localhost:8081).
 
 ## 2. Login e dados compartilhados (Supabase, gratuito)
 
-O login é feito **por código no e-mail**: a pessoa digita o e-mail, recebe um código de 6 números e entra. Não tem senha. Só entra quem estiver na lista de **Membros**:
+O login é por **e-mail e senha**, e só entra quem estiver na lista de **Membros**:
 
 - `thialisonbr@gmail.com` é o **administrador**. Ele já vem cadastrado pelo SQL.
-- O administrador abre **Locais → Membros do app** e inclui o e-mail de quem pode usar (mãe, pai…). Pela mesma tela ele tira o acesso.
-- Um e-mail fora da lista não recebe código. Mesmo que alguém tente acessar o banco direto, as regras do banco (RLS) não mostram nada para quem não é membro.
+- O administrador abre **Locais → Membros do app** e inclui o e-mail de quem pode usar.
+- No **primeiro acesso**, a pessoa digita o e-mail e cria a própria senha. Nos próximos, entra com essa senha.
+- **Esqueceu a senha?** O administrador toca em **Redefinir senha** no e-mail da pessoa, em Membros. Ela entra de novo e cria uma senha nova. As faxinas não são apagadas.
+- Um e-mail fora da lista não consegue criar senha. Mesmo acessando o banco direto, as regras do banco (RLS) não mostram nada para quem não é membro.
+
+> Inclua a pessoa em Membros e avise para ela criar a senha logo, porque até lá qualquer um que souber esse e-mail poderia criar a senha antes.
 
 Passo a passo (uma vez só):
 
-1. Crie uma conta em <https://supabase.com> e um **New project**. O plano grátis é suficiente.
-2. Abra **SQL Editor**, cole todo o conteúdo de [`supabase/esquema.sql`](supabase/esquema.sql) e clique em **Run**.
-3. **Faça o e-mail mandar o código.** Em **Authentication → Emails → Templates**, abra os modelos **Magic Link** e **Confirm signup** e troque o texto por algo como:
+1. Crie uma conta em <https://supabase.com> e um **New project**. O plano grátis é suficiente; use a região **South America (São Paulo)**.
+2. Abra **SQL Editor** → **New query**, cole todo o conteúdo de [`supabase/esquema.sql`](supabase/esquema.sql) e clique em **Run**.
+3. Em **Authentication → Sign In / Providers → Email**, deixe:
+   - **Enable Email provider**: ligado
+   - **Confirm email**: **desligado**, para que nenhum e-mail precise ser enviado
+   - **Allow new users to sign up**: ligado, necessário no primeiro acesso de cada membro
 
-   ```html
-   <h2>Seu código para entrar no Diárias</h2>
-   <p style="font-size:28px;letter-spacing:6px"><b>{{ .Token }}</b></p>
-   <p>Se não foi você que pediu, é só ignorar este e-mail.</p>
-   ```
+   Clique em **Save**.
+4. Clique em **Connect** (no topo do projeto) ou vá em **Settings → API Keys** e copie a **Project URL** (`https://xxxx.supabase.co`) e a **Publishable key** (começa com `sb_publishable_`). A chave antiga **anon** também funciona.
 
-4. Em **Authentication → Sign In / Providers**, deixe **Email** ligado e **Allow new users to sign up** também ligado. Isso é necessário no primeiro acesso de cada membro, e a lista de Membros continua controlando quem entra.
-5. Clique em **Connect** (no topo do projeto) ou vá em **Settings → API Keys** e copie a **Project URL** (`https://xxxx.supabase.co`) e a **Publishable key** (começa com `sb_publishable_`). A chave antiga **anon** também funciona.
-
-> O envio de e-mail padrão do Supabase tem limite de poucos e-mails por hora. Para uma família isso basta. Se os códigos pararem de chegar, configure um SMTP próprio em **Authentication → Emails → SMTP Settings** (Gmail com senha de app ou Resend, por exemplo).
+> Se o administrador esquecer a própria senha: no Supabase, em **Authentication → Users**, apague o usuário `thialisonbr@gmail.com`. No próximo acesso pelo app ele cria uma senha nova, e nenhum dado se perde.
 
 Para rodar no seu computador com o Supabase, crie o `.env` a partir do exemplo e cole a URL e a chave:
 
@@ -71,7 +72,7 @@ npm run web
 O repositório já tem o workflow [`.github/workflows/publicar.yml`](.github/workflows/publicar.yml). A cada `push` na branch `main` ele testa, gera o site e publica.
 
 1. No GitHub, em **Settings → Pages → Build and deployment → Source**, escolha **GitHub Actions**.
-2. Em **Settings → Secrets and variables → Actions → Variables**, crie duas variáveis com os valores do passo 5 acima:
+2. Em **Settings → Secrets and variables → Actions → Variables**, crie duas variáveis com os valores do passo 4 acima:
    - `EXPO_PUBLIC_SUPABASE_URL`
    - `EXPO_PUBLIC_SUPABASE_KEY`
 3. Em **Actions → Publicar no GitHub Pages → Run workflow** (ou faça um push).
@@ -85,7 +86,7 @@ O app fica em **https://thialison.github.io/minhas-diarias/**. Sem as variáveis
 - **Android (Chrome):** abra o link → menu ⋮ → **Instalar app** (ou **Adicionar à tela inicial**).
 - **iPhone (Safari):** abra o link → botão **Compartilhar** → **Adicionar à Tela de Início**.
 
-Depois é só abrir pelo ícone. Cada pessoa entra uma vez com o próprio e-mail e o código.
+Depois é só abrir pelo ícone. Cada pessoa entra uma vez com o próprio e-mail e a senha, e o app continua conectado.
 
 ---
 
@@ -107,7 +108,7 @@ src/
     faxina.tsx         registrar / editar faxina
     faxinas.tsx        todas as faxinas com filtro
     local.tsx          novo / editar local
-    entrar.tsx         login por código e nome
+    entrar.tsx         login por e-mail e senha, primeiro acesso e nome
     membros.tsx        quem tem acesso (só o administrador)
   components/          botões, campos, calendário, cartões, ícones
   data/                Supabase, modo demonstração, sessão e dados

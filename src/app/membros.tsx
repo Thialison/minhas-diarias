@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { Icone } from '../components/Icone';
-import { Botao, Cabecalho, Campo, Cartao, FaixaErro, Rotulo, T, Tela, Vazio } from '../components/ui';
-import { incluirMembro, listarMembros, removerMembro, type Membro } from '../data/membros';
+import { Botao, Cabecalho, Campo, Cartao, FaixaErro, Link, Rotulo, T, Tela, Vazio } from '../components/ui';
+import { incluirMembro, listarMembros, redefinirSenha, removerMembro, type Membro } from '../data/membros';
 import { useSessao } from '../data/sessao';
-import { confirmar } from '../lib/dialogos';
+import { avisar, confirmar } from '../lib/dialogos';
 import { cor } from '../tema';
 
 export default function Membros() {
@@ -36,9 +36,20 @@ export default function Membros() {
     const e = await incluirMembro(novo);
     setSalvando(false);
     if (e) return setErro(e);
-    setOk(`${novo.trim().toLowerCase()} já pode entrar no app com o próprio e-mail.`);
+    setOk(`Pronto! ${novo.trim().toLowerCase()} já pode abrir o app, digitar o e-mail e criar uma senha.`);
     setNovo('');
     carregar();
+  }
+
+  async function redefinir(m: Membro) {
+    const ok = await confirmar(
+      'Redefinir senha',
+      `A senha de ${m.email} será apagada. No próximo acesso, a pessoa digita o e-mail e cria uma senha nova.`,
+      'Redefinir',
+    );
+    if (!ok) return;
+    const e = await redefinirSenha(m.email);
+    avisar(e ? 'Ops' : 'Senha redefinida', e ?? `Avise ${m.email} para entrar de novo e criar uma senha nova.`);
   }
 
   async function remover(m: Membro) {
@@ -64,7 +75,8 @@ export default function Membros() {
     <Tela>
       <Cabecalho titulo="Membros" voltar />
       <T tam={16} cor={cor.suave}>
-        Quem está nesta lista pode entrar no app com o próprio e-mail e ver os mesmos dados.
+        Quem está nesta lista pode entrar no app com o próprio e-mail e ver os mesmos dados. No primeiro acesso, a
+        pessoa cria a própria senha.
       </T>
 
       <Cartao style={{ gap: 10 }}>
@@ -112,6 +124,7 @@ export default function Membros() {
                 {m.papel === 'admin' ? 'Administrador' : 'Membro'}
                 {m.email === meuEmail ? ' · você' : ''}
               </T>
+              {m.papel === 'membro' ? <Link rotulo="Redefinir senha" onPress={() => redefinir(m)} /> : null}
             </View>
             {m.papel === 'membro' ? (
               <Pressable

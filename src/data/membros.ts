@@ -31,3 +31,9 @@ export async function removerMembro(email: string): Promise<void> {
   const { error } = await cliente().from('membros').delete().eq('email', email);
   if (error) throw error;
 }
+
+/** Apaga a senha do membro: no próximo acesso ele cria uma nova. Retorna erro amigável ou null. */
+export async function redefinirSenha(email: string): Promise<string | null> {
+  const { error } = await cliente().rpc('redefinir_senha_membro', { p_email: email });
+  return error ? 'Não foi possível redefinir. Tente de novo.' : null;
+}
