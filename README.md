@@ -55,7 +55,7 @@ Passo a passo (uma vez só):
    ```
 
 4. Em **Authentication → Sign In / Providers**, deixe **Email** ligado e **Allow new users to sign up** também ligado. Isso é necessário no primeiro acesso de cada membro, e a lista de Membros continua controlando quem entra.
-5. Em **Project Settings → API**, copie a **Project URL** e a chave pública (**publishable** ou **anon**).
+5. Clique em **Connect** (no topo do projeto) ou vá em **Settings → API Keys** e copie a **Project URL** (`https://xxxx.supabase.co`) e a **Publishable key** (começa com `sb_publishable_`). A chave antiga **anon** também funciona.
 
 > O envio de e-mail padrão do Supabase tem limite de poucos e-mails por hora. Para uma família isso basta. Se os códigos pararem de chegar, configure um SMTP próprio em **Authentication → Emails → SMTP Settings** (Gmail com senha de app ou Resend, por exemplo).
 
