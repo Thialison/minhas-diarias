@@ -11,7 +11,7 @@ import { cor } from '../../tema';
 export default function Locais() {
   const router = useRouter();
   const { locais, locaisAtivos } = useDados();
-  const { nome, email, modo, sair } = useSessao();
+  const { nome, email, modo, admin, sair } = useSessao();
   const [verArquivados, setVerArquivados] = useState(false);
   const arquivados = locais.filter((l) => l.arquivado);
 
@@ -59,6 +59,7 @@ export default function Locais() {
             {email ? ` (${email})` : ''}.
           </T>
         )}
+        {admin ? <Link rotulo="Membros do app" icone="mais" onPress={() => router.push('/membros')} /> : null}
         <Link
           rotulo={modo === 'demo' ? 'Trocar nome' : 'Sair desta conta'}
           icone="sair"

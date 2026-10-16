@@ -28,9 +28,9 @@ export default function Raiz() {
 }
 
 function Navegacao({ pronto }: { pronto: boolean }) {
-  const { carregando, logado, nome } = useSessao();
+  const { carregando, logado, temAcesso, nome } = useSessao();
   if (!pronto || carregando) return <Carregando />;
-  const liberado = logado && Boolean(nome);
+  const liberado = logado && temAcesso && Boolean(nome);
   return (
     <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: cor.fundo } }}>
       <Stack.Protected guard={liberado}>
@@ -38,6 +38,7 @@ function Navegacao({ pronto }: { pronto: boolean }) {
         <Stack.Screen name="faxina" options={{ title: 'Faxina' }} />
         <Stack.Screen name="faxinas" options={{ title: 'Todas as faxinas' }} />
         <Stack.Screen name="local" options={{ title: 'Local' }} />
+        <Stack.Screen name="membros" options={{ title: 'Membros' }} />
       </Stack.Protected>
       <Stack.Protected guard={!liberado}>
         <Stack.Screen name="entrar" options={{ title: 'Entrar' }} />

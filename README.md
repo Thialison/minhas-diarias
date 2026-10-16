@@ -34,44 +34,58 @@ npm run web
 
 Abra o endereço que aparecer no terminal (normalmente http://localhost:8081).
 
-## 2. Ligar a sincronização entre os celulares (Supabase, gratuito)
+## 2. Login e dados compartilhados (Supabase, gratuito)
 
-1. Crie uma conta em <https://supabase.com> e um **New project** (o plano grátis é suficiente).
-2. No projeto, abra **SQL Editor**, cole todo o conteúdo de [`supabase/esquema.sql`](supabase/esquema.sql) e clique em **Run**.
-3. Em **Authentication → Users → Add user → Create new user**, crie uma conta para a mãe e outra para o pai (e-mail e senha). Marque **Auto Confirm User**.
-4. Abra [`supabase/familia.sql`](supabase/familia.sql), troque os dois e-mails pelos que você usou, cole no **SQL Editor** e rode. Só essas contas conseguem ver os dados.
-5. Recomendado: em **Authentication → Sign In / Providers**, desligue **Allow new users to sign up**, para ninguém criar conta sozinho.
-6. Em **Project Settings → API**, copie a **Project URL** e a chave pública (**publishable** ou **anon**). Crie o arquivo `.env` a partir do exemplo:
+O login é feito **por código no e-mail**: a pessoa digita o e-mail, recebe um código de 6 números e entra. Não tem senha. Só entra quem estiver na lista de **Membros**:
 
-   ```bash
-   cp .env.example .env
-   # edite o .env e cole a URL e a chave
+- `thialisonbr@gmail.com` é o **administrador**. Ele já vem cadastrado pelo SQL.
+- O administrador abre **Locais → Membros do app** e inclui o e-mail de quem pode usar (mãe, pai…). Pela mesma tela ele tira o acesso.
+- Um e-mail fora da lista não recebe código. Mesmo que alguém tente acessar o banco direto, as regras do banco (RLS) não mostram nada para quem não é membro.
+
+Passo a passo (uma vez só):
+
+1. Crie uma conta em <https://supabase.com> e um **New project**. O plano grátis é suficiente.
+2. Abra **SQL Editor**, cole todo o conteúdo de [`supabase/esquema.sql`](supabase/esquema.sql) e clique em **Run**.
+3. **Faça o e-mail mandar o código.** Em **Authentication → Emails → Templates**, abra os modelos **Magic Link** e **Confirm signup** e troque o texto por algo como:
+
+   ```html
+   <h2>Seu código para entrar no Diárias</h2>
+   <p style="font-size:28px;letter-spacing:6px"><b>{{ .Token }}</b></p>
+   <p>Se não foi você que pediu, é só ignorar este e-mail.</p>
    ```
 
-7. Rode `npm run web` de novo. Agora aparece a tela de **Entrar**. No primeiro acesso, o app pergunta como a pessoa quer ser chamada. Esse nome aparece na saudação e em "por Maria" em cada faxina registrada.
+4. Em **Authentication → Sign In / Providers**, deixe **Email** ligado e **Allow new users to sign up** também ligado. Isso é necessário no primeiro acesso de cada membro, e a lista de Membros continua controlando quem entra.
+5. Em **Project Settings → API**, copie a **Project URL** e a chave pública (**publishable** ou **anon**).
 
-> A chave pública pode ficar no app. Quem protege os dados são as regras do banco (RLS), que só liberam as contas da tabela `familia`.
+> O envio de e-mail padrão do Supabase tem limite de poucos e-mails por hora. Para uma família isso basta. Se os códigos pararem de chegar, configure um SMTP próprio em **Authentication → Emails → SMTP Settings** (Gmail com senha de app ou Resend, por exemplo).
 
-## 3. Colocar no ar (para abrir no celular)
-
-O app precisa estar num endereço na internet (https) para ser instalado no celular.
-
-**Jeito mais simples (Netlify Drop, sem GitHub):**
+Para rodar no seu computador com o Supabase, crie o `.env` a partir do exemplo e cole a URL e a chave:
 
 ```bash
-npm run build:web     # gera a pasta dist/ já com os dados do .env
+cp .env.example .env
+npm run web
 ```
 
-Abra <https://app.netlify.com/drop> e arraste a pasta `dist`. O Netlify gera um link. O arquivo `public/_redirects` já faz as páginas internas funcionarem. Sempre que mudar algo, gere o `dist` de novo e arraste outra vez.
+## 3. Publicar no GitHub Pages
 
-**Com GitHub + Vercel (atualiza sozinho a cada mudança):** suba o projeto para o GitHub, importe em <https://vercel.com/new> e, em **Environment Variables**, cadastre `EXPO_PUBLIC_SUPABASE_URL` e `EXPO_PUBLIC_SUPABASE_KEY`. O `vercel.json` já tem o comando de build.
+O repositório já tem o workflow [`.github/workflows/publicar.yml`](.github/workflows/publicar.yml). A cada `push` na branch `main` ele testa, gera o site e publica.
+
+1. No GitHub, em **Settings → Pages → Build and deployment → Source**, escolha **GitHub Actions**.
+2. Em **Settings → Secrets and variables → Actions → Variables**, crie duas variáveis com os valores do passo 5 acima:
+   - `EXPO_PUBLIC_SUPABASE_URL`
+   - `EXPO_PUBLIC_SUPABASE_KEY`
+3. Em **Actions → Publicar no GitHub Pages → Run workflow** (ou faça um push).
+
+O app fica em **https://thialison.github.io/diarias/**. Sem as variáveis, o site sobe em modo demonstração, com os dados só no aparelho.
+
+> Se o repositório tiver outro nome, troque `"baseUrl": "/diarias"` no `app.json` pelo novo nome.
 
 ## 4. Instalar no celular
 
 - **Android (Chrome):** abra o link → menu ⋮ → **Instalar app** (ou **Adicionar à tela inicial**).
 - **iPhone (Safari):** abra o link → botão **Compartilhar** → **Adicionar à Tela de Início**.
 
-Depois é só abrir pelo ícone, como qualquer aplicativo. Cada um entra uma vez com seu e-mail e senha.
+Depois é só abrir pelo ícone. Cada pessoa entra uma vez com o próprio e-mail e o código.
 
 ---
 
@@ -93,13 +107,16 @@ src/
     faxina.tsx         registrar / editar faxina
     faxinas.tsx        todas as faxinas com filtro
     local.tsx          novo / editar local
-    entrar.tsx         login e nome
+    entrar.tsx         login por código e nome
+    membros.tsx        quem tem acesso (só o administrador)
   components/          botões, campos, calendário, cartões, ícones
   data/                Supabase, modo demonstração, sessão e dados
   lib/                 datas, dinheiro e diálogos (com testes)
   tema.ts              cores e fontes
 supabase/              SQL do banco
 public/                manifest, ícones e service worker do PWA
+scripts/pos-build.mjs  ajustes para o GitHub Pages (caminho /diarias, 404.html)
+.github/workflows/     publicação automática no GitHub Pages
 ```
 
 Cores principais: azul `#2B6CD4`, amarelo `#F2B33D` e fundo `#F4F8FE`. As fontes são Atkinson Hyperlegible, feita para leitura fácil, e Bricolage Grotesque nos títulos.

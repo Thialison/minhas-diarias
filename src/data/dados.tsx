@@ -24,7 +24,8 @@ interface Dados {
 const Contexto = createContext<Dados | null>(null);
 
 export function DadosProvider({ children }: { children: ReactNode }) {
-  const { logado, nome } = useSessao();
+  const { logado: entrou, temAcesso, nome } = useSessao();
+  const logado = entrou && temAcesso;
   const backend = useMemo<Backend>(() => (supabase ? backendNuvem(supabase) : backendDemo()), []);
   const [locais, setLocais] = useState<Local[]>([]);
   const [faxinas, setFaxinas] = useState<Faxina[]>([]);

@@ -22,6 +22,6 @@ self.addEventListener('fetch', (e) => {
         }
         return res;
       })
-      .catch(() => caches.match(req).then((r) => r || caches.match('/'))),
+      .catch(() => caches.match(req).then((r) => r || caches.match(self.registration.scope))),
   );
 });
