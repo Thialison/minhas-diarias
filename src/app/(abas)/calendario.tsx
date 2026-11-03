@@ -101,6 +101,16 @@ export default function Calendario() {
         </T>
       </View>
 
+      {periodo === 'q1' || periodo === 'q2' || periodo === 'mes' ? (
+        <View style={{ marginTop: -8, alignItems: 'flex-start' }}>
+          <Link
+            rotulo="Enviar relatório deste período"
+            icone="relatorio"
+            onPress={() => router.push({ pathname: '/relatorio', params: { periodo } })}
+          />
+        </View>
+      ) : null}
+
       <GradeMes
         ano={ano}
         mes={mes}

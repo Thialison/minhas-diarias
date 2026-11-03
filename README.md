@@ -9,6 +9,7 @@ App (PWA) para registrar as faxinas e acompanhar os ganhos por **dia, semana, qu
 - **Registrar faxina**: escolhe o dia (Hoje, Ontem ou Outro, pelo calendário), o local e o valor, que já vem preenchido com o valor do local. A observação é opcional.
 - **Todas as faxinas** (pelo "Ver tudo"): lista do mês com filtro por tipo (Apto, Casa, Loja) e por local. Mostra o total do que está filtrado.
 - **Locais**: cadastro de cada lugar com tipo e valor da diária. Um local com histórico não é apagado, e sim arquivado, para não perder as contas antigas.
+- **Relatório para WhatsApp** (link "Enviar relatório" no Início, ou no Calendário com 1 a 15 / 16 a 31 / Mês): escolhe 1ª quinzena, 2ª quinzena ou mês e quais locais entram, mostra a prévia da mensagem (dia, local e valor, com o total) e envia direto no WhatsApp ou copia o texto.
 - Tocar numa faxina abre a tela de edição, onde também dá para excluir.
 
 Regras das contas:
@@ -95,7 +96,7 @@ Depois é só abrir pelo ícone. Cada pessoa entra uma vez com o próprio e-mail
 ```bash
 npm run web          # desenvolvimento no navegador
 npm run typecheck    # checagem de tipos (TypeScript)
-npm test             # testes das contas de datas e dinheiro
+npm test             # testes das contas de datas, dinheiro e relatório
 npm run build:web    # build de produção em dist/
 ```
 
@@ -110,6 +111,7 @@ src/
     local.tsx          novo / editar local
     entrar.tsx         login por e-mail e senha, primeiro acesso e nome
     membros.tsx        quem tem acesso (só o administrador)
+    relatorio.tsx      relatório quinzenal/mensal para o WhatsApp
   components/          botões, campos, calendário, cartões, ícones
   data/                Supabase, modo demonstração, sessão e dados
   lib/                 datas, dinheiro e diálogos (com testes)
