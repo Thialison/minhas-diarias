@@ -63,8 +63,8 @@ export default function Inicio() {
       <View style={est.grade}>
         {blocos.map((b) => (
           <Cartao key={b.dias} style={[est.bloco, { backgroundColor: b.fundo, borderColor: b.borda }]}>
-            <T negrito tam={15} cor={cor.suave}>
-              {b.rotulo} <T tam={15} cor={cor.suave}>({b.dias})</T>
+            <T negrito tam={15} cor={cor.suave} linhas={1}>
+              {b.rotulo} <T tam={14} cor={cor.suave}>{b.dias}</T>
             </T>
             <T titulo tam={28}>
               {b.qtd}
@@ -75,6 +75,11 @@ export default function Inicio() {
           </Cartao>
         ))}
       </View>
+      {faxinas.length > 0 ? (
+        <View style={{ marginTop: -8, alignItems: 'flex-start' }}>
+          <Link rotulo="Enviar relatório" icone="relatorio" onPress={() => router.push('/relatorio')} />
+        </View>
+      ) : null}
 
       {semLocais ? (
         <Cartao style={{ gap: 12 }}>

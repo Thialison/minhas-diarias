@@ -39,6 +39,7 @@ function Navegacao({ pronto }: { pronto: boolean }) {
         <Stack.Screen name="faxinas" options={{ title: 'Todas as faxinas' }} />
         <Stack.Screen name="local" options={{ title: 'Local' }} />
         <Stack.Screen name="membros" options={{ title: 'Membros' }} />
+        <Stack.Screen name="relatorio" options={{ title: 'Relatório' }} />
       </Stack.Protected>
       <Stack.Protected guard={!liberado}>
         <Stack.Screen name="entrar" options={{ title: 'Entrar' }} />

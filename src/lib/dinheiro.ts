@@ -34,3 +34,8 @@ export function lerValor(texto: string): number | null {
 export function somar<T extends { valor: number }>(itens: T[]): number {
   return Math.round(itens.reduce((s, i) => s + i.valor, 0) * 100) / 100;
 }
+
+/** Sempre com centavos: 180 → "R$ 180,00" (usado no relatório). */
+export function brlCentavos(valor: number): string {
+  return `R$ ${valorParaTexto(valor)}`;
+}

@@ -3,6 +3,7 @@ import type { TipoLocal } from '../data/tipos';
 
 export type NomeIcone =
   | 'voltar' | 'avancar' | 'baixo' | 'mais' | 'check' | 'fechar' | 'lixeira' | 'sair'
+  | 'whatsapp' | 'copiar' | 'relatorio'
   | 'inicio' | 'calendario' | 'calendarioSimples' | 'locais' | 'filtro' | 'grade'
   | TipoLocal;
 
@@ -38,6 +39,27 @@ function desenho(nome: NomeIcone, cor: string, p: any) {
       return <Path d="M6 6l12 12M18 6L6 18" {...p} />;
     case 'lixeira':
       return <Path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3" {...p} />;
+    case 'whatsapp':
+      return (
+        <>
+          <Path d="M4 20l1.3-3.9A8 8 0 1 1 8 19z" {...p} />
+          <Path d="M9.5 9.5c.3 1.6 1.6 3.4 3.4 4.3l1.1-1.1 2 .8c-.2 1-1 1.7-2 1.6-3.3-.4-5.9-3-6.3-6.3-.1-1 .6-1.8 1.6-2l.8 2z" {...p} />
+        </>
+      );
+    case 'copiar':
+      return (
+        <>
+          <Rect x={8} y={8} width={12} height={12} rx={2} {...p} />
+          <Path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2" {...p} />
+        </>
+      );
+    case 'relatorio':
+      return (
+        <>
+          <Path d="M7 3h7l5 5v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z" {...p} />
+          <Path d="M14 3v5h5M9 13h6M9 17h4" {...p} />
+        </>
+      );
     case 'sair':
       return <Path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3M10 17l5-5-5-5M15 12H4" {...p} />;
     case 'inicio':
